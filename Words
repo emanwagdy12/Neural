@@ -1,0 +1,107 @@
+words = ["I", "love", "deep", "learning"]
+
+
+word_to_idx = {"I": 0, "love": 1, "deep": 2, "learning": 3}
+idx_to_word = {0: "I", 1: "love", 2: "deep", 3: "learning"}
+
+
+X_train = [0, 1, 2]  # "I", "love", "deep"
+y_train = 3          # "learning"
+
+
+vocab_size = 4
+input_size = vocab_size
+hidden_size = 5
+output_size = vocab_size
+
+
+Wxh = [[0.1 for _ in range(input_size)] for _ in range(hidden_size)]
+Whh = [[0.1 for _ in range(hidden_size)] for _ in range(hidden_size)]
+Why = [[0.1 for _ in range(hidden_size)] for _ in range(output_size)]
+bh = [0 for _ in range(hidden_size)]
+by = [0 for _ in range(output_size)]
+
+
+def vector_dot_matrix(vec, mat):
+    
+    result = [0] * len(mat)
+    for i in range(len(mat)):
+        for j in range(len(vec)):
+            result[i] += vec[j] * mat[i][j]
+    return result
+
+def vector_add(vec1, vec2):
+    
+    return [vec1[i] + vec2[i] for i in range(len(vec1))]
+
+def tanh(x):
+    
+    return [(2 / (1 + pow(2.71828, -2*i))) - 1 for i in x]
+
+def softmax(x):
+    max_x = max(x)
+    exp_x = [pow(2.71828, i - max_x) for i in x]
+    sum_exp = sum(exp_x)
+    return [i / sum_exp for i in exp_x]
+
+
+def one_hot(idx, size):
+    vec = [0] * size
+    vec[idx] = 1
+    return vec
+
+
+h = [0] * hidden_size
+
+
+for epoch in range(300):
+    h = [0] * hidden_size 
+
+    
+    
+    for idx in X_train:
+        x = one_hot(idx, vocab_size)
+
+        h1 = vector_dot_matrix(x, Wxh)
+        h2 = vector_dot_matrix(h, Whh)
+        h_sum = vector_add(h1, h2)
+        h = tanh(vector_add(h_sum, bh))
+
+    
+    y = vector_dot_matrix(h, Why)
+    y = vector_add(y, by)
+    p = softmax(y)
+
+   
+    loss = -1 * log(p[y_train])
+
+    
+    if epoch % 50 == 0:
+        print("Epoch", epoch, "Loss:", loss)
+
+
+h = [0] * hidden_size
+for idx in X_train:
+    x = one_hot(idx, vocab_size)
+    h1 = vector_dot_matrix(x, Wxh)
+    h2 = vector_dot_matrix(h, Whh)
+    h_sum = vector_add(h1, h2)
+    h = tanh(vector_add(h_sum, bh))
+
+y = vector_dot_matrix(h, Why)
+y = vector_add(y, by)
+p = softmax(y)
+
+predicted_idx = p.index(max(p))
+
+print("\nPredicted 4th word:", idx_to_word[predicted_idx])
+
+
+def log(x):
+    n = 50  
+    result = 0
+    x = (x - 1) / (x + 1)
+    x2 = x * x
+    for i in range(1, 2*n, 2):
+        result += (1/i) * (x**i)
+    return 2 * result
